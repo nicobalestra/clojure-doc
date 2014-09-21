@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+ <head>
+  <link rel="stylesheet" href="css/docs.css" >
+  <link rel="stylesheet" href="css/codemirror.css" >
+
+
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
+ </head>
+ <body ng-app="clojureDoc"
+          ng-controller="docify">
+  <article>
+     <form>
+        <div ui-codemirror="{onLoad : codemirrorLoaded}" ng-model="code">
+
+         </div>
+        <input ng-click="doDocify()" type="submit" value="Docify">
+     </form>
+     <div id="doc">
+         The documentation should appear here
+     </div>
+
+  </article>
+ </body>
+  <script src="js/angular.min.js"></script>
+  <script src="js/ui-codemirror.js" type="text/javascript"></script>
+  <script src="js/cljs/goog/base.js" type="text/javascript"></script>
+  <script src="js/underscore-min.js" type="text/javascript"></script>
+  <script src="js/restangular.js" type="text/javascript"></script>
+  <script src="js/codemirror.js" type="text/javascript"></script>
+  <script src="js/cm_clojure.js" type="text/javascript"></script>
+
+  <script src="js/cljs/clojure_doc.js" type="text/javascript"></script>
+
+
+
+  <script type="text/javascript">goog.require("clojure_doc.core");</script>
+
+</html>
