@@ -20,10 +20,9 @@
         <div ui-codemirror="{onLoad : codemirrorLoaded}" ng-model="code">
 
          </div>
-        <input ng-click="doDocify()" type="submit" value="Docify">
      </form>
      <div id="doc">
-         The documentation should appear here
+         {{currentDoc}}
      </div>
 
   </article>

@@ -1,7 +1,8 @@
 (ns clojure-doc.core
-  (:use-macros [purnam.core :only [obj arr ? ! !> def.n]]
+  (:use-macros [purnam.core :only [obj arr ? ! !> ?> def.n]]
                [gyr.core :only [def.module def.filter
-                                def.factory def.controller]]))
+                                def.factory def.controller
+                                def.service]]))
 (enable-console-print!)
 
 (def initial-code " ; Conway's Game of Life, based on the work of:
@@ -59,34 +60,37 @@
 
 (def.module clojureDoc [ui.codemirror, restangular])
 
-(def.n show-help [editor]
+(def.factory clojureDoc.BaseREST [Restangular]
+   (obj :getDoc (
+    fn [api]
+    (let [restCall (?> Restangular.one "doc" api)
+          doc (?> restCall.get)]
+      doc
+    ))))
+  
+
+(def.n show-help [editor baseRest]
   (let [cursor-coords (editor.cursorCoords)
         left cursor-coords.left
         top cursor-coords.top
         cursor-pos (editor.coordsChar (obj :left left :top top))
         token (editor.getTokenAt (obj :line cursor-pos.line :ch cursor-pos.ch) true)
         ]
-  (when (= token.type "builtin")
-    (println "Token is " token.string))))
+  (when (not (nil? (#{"builtin" "keyword"} token.type)))
+    (baseRest.getDoc token.string))))
 
-(def.controller clojureDoc.docify [$scope, Restangular]
-(! $scope.codemirrorLoaded
+(def.controller clojureDoc.docify [$scope, Restangular, BaseREST]
+  (! $scope.codemirrorLoaded
    (fn [editor]
      (!> editor.setOption "lineNumbers" true)
-     (!> editor.on "cursorActivity" show-help)))
-
-  (! $scope.docify (!> Restangular.all "docify") )
-
-  (! $scope.code initial-code)
+     (!> editor.on "cursorActivity" (fn [editor]
+                                      (! $scope.currentDoc (show-help editor BaseREST))))))
+ (! $scope.code initial-code)
   (! $scope.editorOptions
      (obj :lineWrapping  true
           :lineNumbers   true,
           :readOnly     "nocursor"
           :mode "clojure"))
-  (! $scope.doDocify
-     (fn []
-       (println "Submitting... " (? $scope.code))
-       (!> $scope.docify.post (? $scope.code))
-       ))
+  (! $scope.currentDoc "This is the current documentation!!!")
 )
 
