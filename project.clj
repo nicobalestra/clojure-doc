@@ -7,6 +7,7 @@
                  [im.chit/gyr "0.3.1"]
                  [compojure "1.1.8"]
                  [enlive "1.1.5"]
+                 [ring/ring-json "0.3.1"]
                  ]
 
   :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]

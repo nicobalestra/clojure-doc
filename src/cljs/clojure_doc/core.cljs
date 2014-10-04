@@ -65,6 +65,7 @@
     fn [api]
     (let [restCall (?> Restangular.one "doc" api)
           doc (?> restCall.get)]
+      ;doc.$object
       doc
     ))))
   
@@ -77,20 +78,28 @@
         token (editor.getTokenAt (obj :line cursor-pos.line :ch cursor-pos.ch) true)
         ]
   (when (not (nil? (#{"builtin" "keyword"} token.type)))
-    (baseRest.getDoc token.string))))
+    (baseRest.getDoc token.string)
+    )))
 
-(def.controller clojureDoc.docify [$scope, Restangular, BaseREST]
+(def.controller clojureDoc.docify [$scope, BaseREST, $sce]
   (! $scope.codemirrorLoaded
    (fn [editor]
      (!> editor.setOption "lineNumbers" true)
-     (!> editor.on "cursorActivity" (fn [editor]
-                                      (! $scope.currentDoc (show-help editor BaseREST))))))
+     (!> editor.on "cursorActivity" 
+        (fn [editor]
+           (let [doc (show-help editor BaseREST)]
+            (when doc 
+              (!> doc.then 
+                (fn [resp]
+                    (! $scope.usage (!> $sce.trustAsHtml resp.usage ))
+                    (! $scope.description (!> $sce.trustAsHtml resp.description ))
+                    (! $scope.title resp.keyword)))))))))
  (! $scope.code initial-code)
   (! $scope.editorOptions
      (obj :lineWrapping  true
           :lineNumbers   true,
           :readOnly     "nocursor"
           :mode "clojure"))
-  (! $scope.currentDoc "This is the current documentation!!!")
+  (! $scope.currentDoc (obj :title ""))
 )
 

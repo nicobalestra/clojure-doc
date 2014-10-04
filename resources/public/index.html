@@ -22,12 +22,14 @@
          </div>
      </form>
      <div id="doc">
-         {{currentDoc}}
+        <div id="doc-title"><h2>{{title}}</h2></div>
+         <div ng-bind-html="usage"  id="usage"></div>
+         <div ng-bind-html="description" id="doc"></div>
      </div>
 
   </article>
  </body>
-  <script src="js/angular.min.js"></script>
+  <script src="js/angular.js"></script>
   <script src="js/ui-codemirror.js" type="text/javascript"></script>
   <script src="js/cljs/goog/base.js" type="text/javascript"></script>
   <script src="js/underscore-min.js" type="text/javascript"></script>

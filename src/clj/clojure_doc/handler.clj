@@ -1,5 +1,6 @@
 (ns clojure-doc.handler
   (:require [compojure.core :refer :all]
+            [ring.middleware.json :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
             [ring.util.response :as resp]
@@ -46,29 +47,39 @@
       first
       (html/text)))
 
+(defn- clean-text [text]
+  (clojure.string/replace text #"\n" "<br/>")
+  )
+
 (defn- search-for [doc api]
   (let [elems (html/select doc [:#var-entry])
-      id (build-doc-id-str api)
-      node (->
-             (reduce (fn [curr el]
-                      (if (and (nil? curr)
-                               (= (get-h2-id el) id))
-                        el
-                        curr)) nil elems))]
-    (str "<div><pre>" (get-var-usage node) "</pre><pre>" (get-var-docstr node))))
+        id (build-doc-id-str api)
+        node (reduce (fn [curr el]
+                       (if (and (nil? curr)
+                                (= (get-h2-id el) id))
+                         el
+                         curr)) 
+             nil 
+             elems)
+        doc  {:keyword api 
+              :usage (clean-text (get-var-usage node))
+              :description   (clean-text (get-var-docstr node))}
+      ]
+  doc))
 
 (defn get-doc [api]
   (when (= @html-doc 0)
     (init-doc))
   (let [doc @html-doc]
     (search-for doc api)))
-;(POST "/docify" {body :body} (get-doc (slurp body)))
 
 (defroutes app-routes
   (GET "/" [] (resp/resource-response "index.html" {:root "public"}))
-  (GET "/doc/:api" [api] (get-doc api))
+  (GET "/doc/:api" [api] (resp/response (get-doc api)))
   (route/resources "/")
   (route/not-found "Not Found"))
 
 (def app
-  (handler/site  app-routes))
+  (-> (handler/site  app-routes)
+      (wrap-json-body)
+      (wrap-json-response)))
